@@ -1,16 +1,29 @@
 #! /bin/bash
+#title           :lf - large files finder cli command
+#description     :generating a list of the largest files on a desire directory
+#author		 :Ofir Elhayani
+#date            :08-06-2014
+#version         :0.1
+#usage		 :lf [-h|--help] [-n|--num-result] number <destination-dir>
+		 # if a number was not entered after -n it will act at default
+		 # which is 10 results
+#notes           :try and have fun :-) if you find anything to improve i'll be glad to learn.
 Usage()			# usage procedure for producing error messages.
 {
 	if [ -n "$1" ]; then echo $1; fi			
 	echo "usage: lf [-h|--help] [-n|--num-result] <number> <destination dir>";exit 1;
 }
-
-Large_files()   
+Chk_dir()
 {
+
 	if [ ! -d $dest_dir ];	# checking if destination exists
 	then
 	Usage "error: directory does not exist";exit 1;
-	else
+	fi
+}
+Large_files()   
+{
+	Chk_dir;
 		if [ $user_id -eq 1 ];
 		then
 		echo -e "user is not sudo or root, results could be different\ndue to access restrictions\n"
@@ -21,7 +34,6 @@ Large_files()
          		if ($1>=x) { printf "%3.1f%s\t%s\n",$1/x,hum[x],$2;break }			#into human readable format
       		}}' | head -n $num_result
 exit 0;
-fi
 }
 dest_dir="$1"
 id | grep -e 'root' -e 'sudo' > /dev/null
@@ -30,20 +42,24 @@ user_id=$?
 	then
 	Usage "error: no destination entered";exit 1;
 	else
-		case "$dest_dir" in
+		case "$1" in
 			"-h" | "--help") Usage;exit 0;;
 			"-n" | "--num-result") 
 						num_result=$2
 						number='^[0-9]+$'
+						[[ $num_result =~ [0-9]+.[0-9]+ ]] && Usage "error: use only integer numbers." && exit 1;
 							if ! [[ $num_result =~ $number ]]
 							then
-							dest_dir="$num_result"
+							dest_dir=$num_result
+							Chk_dir;
+							echo -e "no number was entered after -n option\nacting at default - 10 results\n"							
 							num_result=10
 							Large_files
 							else
 							dest_dir=$3
 							Large_files
 							fi;;			
-			*) num_result=10; Large_files;;
-			esac
+			"-"*) Usage "error: option does not exist";;	
+			*) num_result=10; Large_files;;	
+		esac
 	fi	
