@@ -59,7 +59,7 @@ user_id=$?
 							dest_dir=$3
 							Large_files
 							fi;;			
-			"-"*) Usage "error: option does not exist";;	
-			*) num_result=10; Large_files;;	
+			"/"*) num_result=10; Large_files;;
+				*) Usage "error: option does not exist";;		
 		esac
 	fi	
